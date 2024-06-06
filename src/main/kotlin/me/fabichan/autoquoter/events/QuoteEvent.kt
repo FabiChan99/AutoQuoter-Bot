@@ -59,7 +59,7 @@ class QuoteEvent(private val database: Database) {
             val message = messages[i]
             try {
                 val m = BuildQuoteEmbed(message)
-                event.channel.sendMessage(m).queue()
+                event.message.reply(m).queue()
                 recordQuoteStats(message)
             } catch (e: Exception) {
 
