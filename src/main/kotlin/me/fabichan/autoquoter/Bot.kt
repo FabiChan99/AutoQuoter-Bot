@@ -24,14 +24,12 @@ class Bot(private val config: Config) : JDAService() {
 
 
     override val cacheFlags: Set<CacheFlag> = setOf(
-        CacheFlag.VOICE_STATE,
-        CacheFlag.MEMBER_OVERRIDES,
     )
 
     override fun createJDA(event: BReadyEvent, eventManager: IEventManager) {
-        val shardManager = DefaultShardManagerBuilder.createDefault(config.token, intents).apply {
+        val shardManager = DefaultShardManagerBuilder.createLight(config.token, intents).apply {
             enableCache(cacheFlags)
-            setMemberCachePolicy(MemberCachePolicy.lru(5000).and(MemberCachePolicy.DEFAULT))
+            setMemberCachePolicy(MemberCachePolicy.NONE)
             setChunkingFilter(ChunkingFilter.NONE)
             setStatus(OnlineStatus.DO_NOT_DISTURB)
             setActivityProvider { Activity.playing("Booting up...") }

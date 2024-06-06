@@ -8,7 +8,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
-application.mainClass.set("xyz.rubybots.rubymod.Main")
+application.mainClass.set("me.fabichan.autoquoter.Main")
 group = "me.fabichan"
 version = "1.0-SNAPSHOT"
 
@@ -36,7 +36,7 @@ dependencies {
 tasks.withType<ShadowJar> {
     mergeServiceFiles()
 
-    archiveFileName.set("RubyModeration.jar")
+    archiveFileName.set("AutoQuoter.jar")
 
 }
 

@@ -51,9 +51,8 @@ data class Config(
     }
 
     object Constants {
-        const val EMBED_COLOR = 0xe91e63
+        const val EMBED_COLOR = 0x00FFFF
         const val BOT_VERSION = "1.0.0"
-        const val COPYRIGHT_FOOTER = "© RubyMod"
         var quotes = "Loading..."
     }
 }

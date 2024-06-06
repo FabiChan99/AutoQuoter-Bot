@@ -169,7 +169,7 @@ class QuoteEvent(private val database: Database) {
     
     private suspend fun recordQuoteStats(quotedMessage: Message) {
         logger.info { "Quoted message from ${quotedMessage.author.name} (${quotedMessage.author.id}) in ${quotedMessage.guild.name}/${quotedMessage.channel.name} (${quotedMessage.guild.id}/${quotedMessage.channel.id})" }
-        database.preparedStatement("INSERT INTO quotestats (user_id, channel_id, guild_id, timestamp) VALUES (?, ?, ?, ?)") {
+        database.preparedStatement("INSERT INTO public.qoutestats (user_id, channel_id, guild_id, timestamp) VALUES (?, ?, ?, ?)") {
             setLong(1, quotedMessage.author.idLong)
             setLong(2, quotedMessage.channel.idLong)
             setLong(3, quotedMessage.guild.idLong)
