@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.WebhookClient
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent
 
-private val logger by lazy { KotlinLogging.logger {} }
+private val logger = KotlinLogging.logger { }
 
 @BService
 class JoinLeaveLogging {

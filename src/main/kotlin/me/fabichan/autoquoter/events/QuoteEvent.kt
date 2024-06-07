@@ -17,7 +17,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.requests.ErrorResponse
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
 
-private val logger by lazy { KotlinLogging.logger {} }
+private val logger = KotlinLogging.logger { }
 
 @BService
 class QuoteEvent(private val database: Database) {
@@ -52,9 +52,6 @@ class QuoteEvent(private val database: Database) {
 
     private suspend fun ProcessMessageWithLinks(event: MessageReceivedEvent) {
         val messages = retrieveMessagesByLink(event.guild, event.message.contentRaw)
-        
-        if (messages.isEmpty()) return
-
         for (i in 0 until minOf(3, messages.size)) {
             val message = messages[i]
             try {

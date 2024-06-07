@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.session.ReadyEvent
 import kotlin.time.Duration.Companion.minutes
 
-private val logger by lazy { KotlinLogging.logger {} }
+private val logger = KotlinLogging.logger { }
 
 @BService
 class UpdateBotStatusTask(private val database: Database) {
