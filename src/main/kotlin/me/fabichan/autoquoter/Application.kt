@@ -6,7 +6,6 @@ import io.github.freya022.botcommands.api.core.BotCommands
 import io.github.freya022.botcommands.api.core.config.DevConfig
 import io.github.oshai.kotlinlogging.KotlinLogging
 import me.fabichan.autoquoter.config.Config
-import net.dv8tion.jda.api.interactions.DiscordLocale
 import java.lang.management.ManagementFactory
 import kotlin.io.path.absolutePathString
 import kotlin.system.exitProcess

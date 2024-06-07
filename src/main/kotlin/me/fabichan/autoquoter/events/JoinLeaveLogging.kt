@@ -20,9 +20,9 @@ class JoinLeaveLogging {
         val guild = event.guild
         val logWebhookUrl = Config.instance.joinLeaveLogWebhook
         val webhook = WebhookClient.createClient(event.jda, logWebhookUrl)
-        
+
         logger.info { "Joined guild ${guild.name} (${guild.id}) with ${guild.memberCount} members" }
-        
+
         val embed = Embed {
             title = "Joined Guild"
             description = "Joined guild ${guild.name} (${guild.id}) with ${guild.memberCount} members"
@@ -53,7 +53,7 @@ class JoinLeaveLogging {
         val guild = event.guild
         val logWebhookUrl = Config.instance.joinLeaveLogWebhook
         val webhook = WebhookClient.createClient(event.jda, logWebhookUrl)
-        
+
         logger.info { "Left guild ${guild.name} (${guild.id}) with ${guild.memberCount} members" }
 
         val embed = Embed {

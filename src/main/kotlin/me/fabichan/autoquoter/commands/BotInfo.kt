@@ -9,13 +9,13 @@ import io.github.freya022.botcommands.api.commands.application.provider.GlobalAp
 import io.github.freya022.botcommands.api.commands.application.slash.GuildSlashEvent
 import io.github.freya022.botcommands.api.core.BContext
 import io.github.oshai.kotlinlogging.KotlinLogging
-import net.dv8tion.jda.api.JDAInfo
-import net.dv8tion.jda.api.Permission
-import net.dv8tion.jda.api.requests.RestAction
-import net.dv8tion.jda.api.utils.TimeFormat
 import me.fabichan.autoquoter.config.Config
 import me.fabichan.autoquoter.utils.UpdateTimer
+import net.dv8tion.jda.api.JDAInfo
+import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.interactions.components.buttons.Button
+import net.dv8tion.jda.api.requests.RestAction
+import net.dv8tion.jda.api.utils.TimeFormat
 import java.lang.management.ManagementFactory
 import kotlin.time.Duration.Companion.minutes
 
@@ -92,10 +92,10 @@ class BotInfo(
                 value = getBotUserCount().toString()
                 inline = true
             }
-            
+
             field {
                 name = "Quote Count"
-                value = "```"+Config.Constants.quotes+"```"
+                value = "```" + Config.Constants.quotes + "```"
                 inline = true
             }
 
@@ -114,12 +114,15 @@ class BotInfo(
             }
             color = Config.Constants.EMBED_COLOR
         }
-        
+
         val userid = event.jda.selfUser.id
-        
-        val inviteButton = Button.link("https://discord.com/api/oauth2/authorize?client_id=$userid&permissions=412317239360&scope=applications.commands+bots", "Invite me")
+
+        val inviteButton = Button.link(
+            "https://discord.com/api/oauth2/authorize?client_id=$userid&permissions=412317239360&scope=applications.commands+bots",
+            "Invite me"
+        )
         val supportButton = Button.link(Config.instance.supportGuildInvite, "Support Server")
-        
+
         event.hook.sendMessageEmbeds(embed).setActionRow(inviteButton, supportButton).queue()
     }
 

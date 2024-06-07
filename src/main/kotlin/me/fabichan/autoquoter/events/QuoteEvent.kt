@@ -103,7 +103,7 @@ class QuoteEvent(private val database: Database) {
                     eb.image = attachment.url
                 }
             }
-            
+
             for (field in oldEmbed.fields) {
                 eb.field {
                     name = field.name.toString()
@@ -167,7 +167,12 @@ class QuoteEvent(private val database: Database) {
     private suspend fun recordQuoteStats(quotedMessage: Message) {
         logger.info { "Quoted message from ${quotedMessage.author.name} (${quotedMessage.author.id}) in ${quotedMessage.guild.name}/${quotedMessage.channel.name} (${quotedMessage.guild.id}/${quotedMessage.channel.id})" }
         database.preparedStatement("INSERT INTO public.qoutestats (user_id, channel_id, guild_id, timestamp) VALUES (?, ?, ?, ?)") {
-            executeUpdate(quotedMessage.author.idLong, quotedMessage.channel.idLong, quotedMessage.guild.idLong, quotedMessage.timeCreated.toEpochSecond())
+            executeUpdate(
+                quotedMessage.author.idLong,
+                quotedMessage.channel.idLong,
+                quotedMessage.guild.idLong,
+                quotedMessage.timeCreated.toEpochSecond()
+            )
         }
-    }      
+    }
 }

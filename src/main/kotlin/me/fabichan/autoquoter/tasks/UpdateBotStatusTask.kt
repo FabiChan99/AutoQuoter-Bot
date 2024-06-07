@@ -40,7 +40,7 @@ class UpdateBotStatusTask(private val database: Database) {
 
     private suspend fun updatePresence(shard: JDA) {
         val shardManager = shard.shardManager!!
-        val qouteCount = getQuoteCount().toString()+"x"
+        val qouteCount = getQuoteCount().toString() + "x"
         val status = if (shardManager.guildCache.size() > 0) OnlineStatus.ONLINE else OnlineStatus.IDLE
         val activity =
             createActivity("Quoted $qouteCount | on ${shardManager.guildCache.size()} servers | on Shard ${shard.shardInfo.shardId} • ${shard.gatewayPing}ms ping")
@@ -50,8 +50,8 @@ class UpdateBotStatusTask(private val database: Database) {
 
     private fun createActivity(activityText: String): Activity =
         Activity.customStatus(activityText)
-    
-    
+
+
     private suspend fun getQuoteCount(): Int {
         database.preparedStatement("SELECT COUNT(*) FROM autoquoter.public.qoutestats") {
             executeQuery().use { rs ->
