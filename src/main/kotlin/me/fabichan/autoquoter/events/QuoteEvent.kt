@@ -28,6 +28,7 @@ class QuoteEvent(private val database: Database) {
     suspend fun onMessage(event: MessageReceivedEvent) {
         if (event.author.isBot) return
         if (!event.isFromGuild) return
+        if (event.message.contentRaw.startsWith("!")) return // message starting with ! are not quoted ("Bypass Quoting") 
 
         ProcessMessageWithLinks(event)
     }
