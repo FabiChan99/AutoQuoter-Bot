@@ -1,6 +1,7 @@
 package me.fabichan.autoquoter.events
 
 import dev.minn.jda.ktx.generics.getChannel
+import dev.minn.jda.ktx.interactions.components.button
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.MessageCreate
 import io.github.freya022.botcommands.api.core.annotations.BEventListener
@@ -14,6 +15,7 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.requests.ErrorResponse
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
 
@@ -55,8 +57,9 @@ class QuoteEvent(private val database: Database) {
         for (i in 0 until minOf(3, messages.size)) {
             val message = messages[i]
             try {
+                val button = Button.link("https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}", "Jump to message")
                 val m = BuildQuoteEmbed(message)
-                event.message.reply(m).mentionRepliedUser(false).queue()
+                event.message.reply(m).setActionRow(button).mentionRepliedUser(false).queue()
                 recordQuoteStats(message)
             } catch (e: Exception) {
 
@@ -89,11 +92,24 @@ class QuoteEvent(private val database: Database) {
                     if (attachment.isImage) {
                         eb.image = attachment.url
                     }
+                    
+                    if (attachment.isVideo) {
+                        eb.description = "Videos can't be quoted"
+                    }
+                }
+            }
+            else if (quotedMessage.attachments.isNotEmpty() && quotedMessage.contentRaw.isEmpty()) {
+                val attachment = quotedMessage.attachments[0]
+                if (attachment.isImage) {
+                    eb.image = attachment.url
+                }
+                if (attachment.isVideo) {
+                    eb.description = "*Videos can't be quoted*"
                 }
             }
         } else {
             val oldEmbed = quotedMessage.embeds[0]
-
+            
             // check image 
             if (oldEmbed.image != null) {
                 eb.image = oldEmbed.image?.url
@@ -153,14 +169,10 @@ class QuoteEvent(private val database: Database) {
         }
     }
 
-    private fun getUserName(user: User): String {
-        @Suppress("DEPRECATION")
-        return if (user.discriminator != "0000") {
-            @Suppress("DEPRECATION")
-            "${user.name}#${user.discriminator}"
-        } else {
-            user.name
-        }
+    @Suppress("DEPRECATION")
+    private fun getUserName(user: User): String = when {
+        user.isBot -> user.asTag
+        else -> user.name
     }
 
 
