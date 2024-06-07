@@ -82,7 +82,7 @@ class QuoteEvent(private val database: Database) {
             if (quotedMessage.contentRaw.isNotEmpty()) {
                 val text = "\"" + quotedMessage.contentRaw + "\""
                 if (quotedMessage.contentRaw.length > 4096) {
-                    eb.description = text.substring(0, 4089) + " [...]"
+                    eb.description = text.truncate(4089) + " [...]"
                 } else {
                     eb.description = text
                 }
