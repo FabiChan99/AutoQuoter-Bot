@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.requests.ErrorResponse
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
+import nonapi.io.github.classgraph.json.Id
 
 private val logger = KotlinLogging.logger { }
 
@@ -45,13 +46,13 @@ class QuoteEvent(private val database: Database) {
     }
 
 
-    private suspend fun retrieveMessagesByLink(content: String, jda: JDA, guildid: String): List<Message> {
+    private suspend fun retrieveMessagesByLink(content: String, jda: JDA, postedGuildId: String): List<Message> {
         return messageUrlRegex.findAll(content).toList()
             .map { it.destructured }
             .mapNotNull { (guildId, channelId, messageId) ->
                 val currentGuild = jda.guilds.firstOrNull { it.id == guildId }
 
-                if (currentGuild == null || (!isCrossGuildPostingEnabled(guildid) && currentGuild.id != guildid)) {
+                if (currentGuild == null || (!isCrossGuildPostingEnabled(currentGuild.id) && currentGuild.id != postedGuildId)) {
                     return@mapNotNull null
                 }
 
