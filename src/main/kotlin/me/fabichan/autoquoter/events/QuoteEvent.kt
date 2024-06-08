@@ -45,16 +45,21 @@ class QuoteEvent(private val database: Database) {
     }
 
 
-    private suspend fun retrieveMessagesByLink(content: String, jda: JDA): List<Message> {
+    private suspend fun retrieveMessagesByLink(content: String, jda: JDA, guildid: String): List<Message> {
         return messageUrlRegex.findAll(content).toList()
             .map { it.destructured }
             .mapNotNull { (guildId, channelId, messageId) ->
-                if (!isCrossGuildPostingEnabled(guildId)) return@mapNotNull null
+                val currentGuild = jda.guilds.firstOrNull { it.id == guildId }
+                println("Current Guild: $currentGuild")
+                if (currentGuild == null) {
+                    return@mapNotNull null
+                }
                 
-                val guild = jda.getGuildById(guildId)
-                    ?: return@mapNotNull null
+                if (currentGuild == null || (!isCrossGuildPostingEnabled(guildid) && currentGuild.id != guildid)) {
+                    return@mapNotNull null
+                }
 
-                val channel = guild.getChannel<GuildMessageChannel>(channelId)
+                val channel = currentGuild.getChannel<GuildMessageChannel>(channelId)
                     ?: return@mapNotNull null
 
                 channel.retrieveMessageById(messageId).awaitOrNullOn(ErrorResponse.UNKNOWN_MESSAGE)
@@ -62,8 +67,9 @@ class QuoteEvent(private val database: Database) {
     }
 
 
-    private suspend fun ProcessMessageWithLinks(event: MessageReceivedEvent) {
-        val messages = retrieveMessagesByLink(event.message.contentRaw, event.jda)
+
+    private suspend fun ProcessMessageWithLinks(event: MessageReceivedEvent, guildid: String = event.guild.id) {
+        val messages = retrieveMessagesByLink(event.message.contentRaw, event.jda, guildid)
         for (i in 0 until minOf(3, messages.size)) {
             val message = messages[i]
             try {
