@@ -31,7 +31,7 @@ class QuoteEvent(private val database: Database) {
         if (!event.isFromGuild) return
         if (event.message.contentRaw.startsWith("!")) return // message starting with ! are not quoted ("Bypass Quoting") 
 
-        ProcessMessageWithLinks(event)
+        processMessageWithLinks(event)
     }
 
     private val messageUrlRegex = Regex(
@@ -65,7 +65,7 @@ class QuoteEvent(private val database: Database) {
 
 
 
-    private suspend fun ProcessMessageWithLinks(event: MessageReceivedEvent, guildid: String = event.guild.id) {
+    private suspend fun processMessageWithLinks(event: MessageReceivedEvent, guildid: String = event.guild.id) {
         val messages = retrieveMessagesByLink(event.message.contentRaw, event.jda, guildid)
         for (i in 0 until minOf(3, messages.size)) {
             val message = messages[i]
