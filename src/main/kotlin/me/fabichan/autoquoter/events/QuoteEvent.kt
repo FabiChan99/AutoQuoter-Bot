@@ -50,11 +50,7 @@ class QuoteEvent(private val database: Database) {
             .map { it.destructured }
             .mapNotNull { (guildId, channelId, messageId) ->
                 val currentGuild = jda.guilds.firstOrNull { it.id == guildId }
-                println("Current Guild: $currentGuild")
-                if (currentGuild == null) {
-                    return@mapNotNull null
-                }
-                
+
                 if (currentGuild == null || (!isCrossGuildPostingEnabled(guildid) && currentGuild.id != guildid)) {
                     return@mapNotNull null
                 }
