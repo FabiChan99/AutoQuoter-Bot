@@ -1,5 +1,6 @@
 package me.fabichan.autoquoter.events
 
+import dev.minn.jda.ktx.coroutines.await
 import dev.minn.jda.ktx.generics.getChannel
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.MessageCreate
@@ -12,13 +13,18 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.Message.Attachment
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.entities.UserSnowflake
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.requests.ErrorResponse
+import net.dv8tion.jda.api.utils.AttachedFile
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
 import nonapi.io.github.classgraph.json.Id
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.days
 
 private val logger = KotlinLogging.logger { }
 
@@ -121,6 +127,11 @@ class QuoteEvent(private val database: Database) {
                     }
                 }
             }
+
+            else if (quotedMessage.stickers.isNotEmpty() && quotedMessage.contentRaw.isEmpty()) {
+                eb.image = quotedMessage.stickers[0].iconUrl
+            }
+            
             else if (quotedMessage.attachments.isNotEmpty() && quotedMessage.contentRaw.isEmpty()) {
                 val attachment = quotedMessage.attachments[0]
                 if (attachment.isImage) {
