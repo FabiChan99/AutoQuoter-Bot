@@ -118,7 +118,7 @@ class BotInfo(
         val userid = event.jda.selfUser.id
 
         val inviteButton = Button.link(
-            "https://discord.com/api/oauth2/authorize?client_id=$userid&permissions=412317239360&scope=applications.commands+bots",
+            "https://discord.com/api/oauth2/authorize?client_id=$userid&permissions=412317239360&scope=applications.commands+bot",
             "Invite me"
         )
         val supportButton = Button.link(Config.instance.supportGuildInvite, "Support Server")
