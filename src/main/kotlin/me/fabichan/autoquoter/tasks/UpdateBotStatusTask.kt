@@ -53,7 +53,7 @@ class UpdateBotStatusTask(private val database: Database) {
 
 
     private suspend fun getQuoteCount(): Int {
-        database.preparedStatement("SELECT COUNT(*) FROM autoquoter.public.qoutestats") {
+        database.preparedStatement("SELECT COUNT(*) FROM qoutestats") {
             executeQuery().use { rs ->
                 rs.next()
                 val i = rs.getInt(1)

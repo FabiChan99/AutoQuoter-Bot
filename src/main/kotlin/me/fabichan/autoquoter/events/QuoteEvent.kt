@@ -1,7 +1,6 @@
 package me.fabichan.autoquoter.events
 
 import dev.minn.jda.ktx.generics.getChannel
-import dev.minn.jda.ktx.interactions.components.button
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.MessageCreate
 import io.github.freya022.botcommands.api.core.annotations.BEventListener
@@ -10,6 +9,7 @@ import io.github.freya022.botcommands.api.core.db.preparedStatement
 import io.github.freya022.botcommands.api.core.service.annotations.BService
 import io.github.freya022.botcommands.api.core.utils.awaitOrNullOn
 import io.github.oshai.kotlinlogging.KotlinLogging
+import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.User
@@ -37,13 +37,22 @@ class QuoteEvent(private val database: Database) {
         "(?:https?://)?(?:\\w+\\.)?discord(?:app)?\\.com/channels/(\\d+)/(\\d+)/(\\d+)",
         RegexOption.IGNORE_CASE
     )
+    
+    private suspend fun isCrossGuildPostingEnabled(guildid: String): Boolean {
+        return database.preparedStatement("SELECT crossguildposting FROM guildsettings WHERE guild_id = ?") {
+            executeQuery(guildid.toLong()).map { it.getBoolean("crossguildposting") }.firstOrNull() ?: false
+        }
+    }
 
 
-    private suspend fun retrieveMessagesByLink(guild: Guild, content: String): List<Message> {
+    private suspend fun retrieveMessagesByLink(content: String, jda: JDA): List<Message> {
         return messageUrlRegex.findAll(content).toList()
             .map { it.destructured }
             .mapNotNull { (guildId, channelId, messageId) ->
-                if (guildId != guild.id) return@mapNotNull null
+                if (!isCrossGuildPostingEnabled(guildId)) return@mapNotNull null
+                
+                val guild = jda.getGuildById(guildId)
+                    ?: return@mapNotNull null
 
                 val channel = guild.getChannel<GuildMessageChannel>(channelId)
                     ?: return@mapNotNull null
@@ -54,23 +63,33 @@ class QuoteEvent(private val database: Database) {
 
 
     private suspend fun ProcessMessageWithLinks(event: MessageReceivedEvent) {
-        val messages = retrieveMessagesByLink(event.guild, event.message.contentRaw)
+        val messages = retrieveMessagesByLink(event.message.contentRaw, event.jda)
         for (i in 0 until minOf(3, messages.size)) {
             val message = messages[i]
             try {
-                val button = Button.link("https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}", "Jump to message")
-                val m = BuildQuoteEmbed(message)
-                event.message.reply(m).setActionRow(button).mentionRepliedUser(false).queue()
-                recordQuoteStats(message)
+                
+                if (message.guild.id == event.guild.id){
+                    val button = Button.link("https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}", "Jump to message")
+                    val m = BuildQuoteEmbed(message, event.guild)
+                    event.message.reply(m).setActionRow(button).mentionRepliedUser(false).queue()
+                    recordQuoteStats(message, event)
+                    return
+                }
+                val m = BuildQuoteEmbed(message, event.guild)
+                event.message.reply(m).mentionRepliedUser(false).queue()
+                recordQuoteStats(message, event)
             } catch (e: Exception) {
 
             }
         }
     }
 
-    private suspend fun BuildQuoteEmbed(quotedMessage: Message): MessageCreateData {
-        val ftitle = "AutoQuoter"
-
+    private suspend fun BuildQuoteEmbed(quotedMessage: Message, eventGuild: Guild): MessageCreateData {
+        var ftitle = "AutoQuoter"
+        
+        if (quotedMessage.guild.id != eventGuild.id) {
+            ftitle += " - External Message from ${quotedMessage.guild.name}"
+        }
         val eb = EmbedBuilder { }
 
 
@@ -134,7 +153,7 @@ class QuoteEvent(private val database: Database) {
 
             if (oldEmbed.footer != null) {
                 eb.footer {
-                    name = (oldEmbed.footer?.text + " - " + ftitle).truncate(4096)
+                    name = (oldEmbed.footer?.text + " - " + ftitle).truncate(256)
                 }
             } else {
                 eb.footer {
@@ -177,8 +196,8 @@ class QuoteEvent(private val database: Database) {
     }
 
 
-    private suspend fun recordQuoteStats(quotedMessage: Message) {
-        logger.info { "Quoted message from ${quotedMessage.author.name} (${quotedMessage.author.id}) in ${quotedMessage.guild.name}/${quotedMessage.channel.name} (${quotedMessage.guild.id}/${quotedMessage.channel.id})" }
+    private suspend fun recordQuoteStats(quotedMessage: Message, event: MessageReceivedEvent) {
+        logger.info { "Quoted message from ${quotedMessage.author.name} (${quotedMessage.author.id}) from ${quotedMessage.guild.name}/${quotedMessage.channel.name} (${quotedMessage.guild.id}/${quotedMessage.channel.id}) in ${event.guild.name}/${event.channel.name} (${event.guild.id}/${event.channel.id})" }
         database.preparedStatement("INSERT INTO public.qoutestats (user_id, channel_id, guild_id, timestamp) VALUES (?, ?, ?, ?)") {
             executeUpdate(
                 quotedMessage.author.idLong,
