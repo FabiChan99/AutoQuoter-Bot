@@ -38,7 +38,7 @@ class GuildCrosspostCommand(
 
         if (enable) {
             setGuildCrosspost(event.guild.id, true)
-            event.hook.sendMessage("Cross-guild posting has been enabled. You accept that messages from this guild may be quoted in other guilds if the user has access to a message link.**").queue()
+            event.hook.sendMessage("Cross-guild posting has been enabled. **You accept that messages from this guild may be quoted in other guilds if the user has access to a message link.**").queue()
         } else {
             setGuildCrosspost(event.guild.id, false)
             event.hook.sendMessage("Cross-guild posting has been disabled.").queue()
