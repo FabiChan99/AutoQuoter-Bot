@@ -10,7 +10,6 @@ import io.github.freya022.botcommands.api.core.BContext
 import io.github.freya022.botcommands.api.core.db.Database
 import io.github.freya022.botcommands.api.core.db.preparedStatement
 import me.fabichan.autoquoter.config.Config
-import me.fabichan.autoquoter.utils.UpdateTimer
 import net.dv8tion.jda.api.JDAInfo
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.interactions.components.buttons.Button

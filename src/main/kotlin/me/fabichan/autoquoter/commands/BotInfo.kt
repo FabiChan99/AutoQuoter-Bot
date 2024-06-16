@@ -10,7 +10,6 @@ import io.github.freya022.botcommands.api.commands.application.slash.GuildSlashE
 import io.github.freya022.botcommands.api.core.BContext
 import io.github.oshai.kotlinlogging.KotlinLogging
 import me.fabichan.autoquoter.config.Config
-import me.fabichan.autoquoter.utils.UpdateTimer
 import net.dv8tion.jda.api.JDAInfo
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.interactions.components.buttons.Button
@@ -26,8 +25,6 @@ private val logger = KotlinLogging.logger { }
 class BotInfo(
     private val context: BContext,
 
-    private val combinedUserCountTimer: UpdateTimer = UpdateTimer(5.minutes),
-    private var combinedUserCount: Int = 0,
 
     ) : GlobalApplicationCommandProvider {
     suspend fun onCommand(
@@ -88,12 +85,6 @@ class BotInfo(
             }
 
             field {
-                name = "User Count"
-                value = getBotUserCount().toString()
-                inline = true
-            }
-
-            field {
                 name = "Quote Count"
                 value = "```" + Config.Constants.quotes + "```"
                 inline = true
@@ -133,16 +124,5 @@ class BotInfo(
             botPermissions += Permission.MESSAGE_SEND
             botPermissions += Permission.MESSAGE_EMBED_LINKS
         }
-    }
-
-    private suspend fun getBotUserCount(): Int {
-        if (combinedUserCountTimer.shouldUpdate()) {
-            combinedUserCount = context.jda.guilds
-                .map { it.retrieveMetaData() }
-                .let { RestAction.allOf(it) }
-                .await()
-                .sumOf { it.approximateMembers }
-        }
-        return combinedUserCount
     }
 }
