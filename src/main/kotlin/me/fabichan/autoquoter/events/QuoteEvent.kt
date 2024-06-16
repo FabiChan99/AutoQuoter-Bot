@@ -53,9 +53,14 @@ class QuoteEvent(private val database: Database) {
 
 
     private suspend fun retrieveMessagesByLink(content: String, jda: JDA, postedGuildId: String): List<Message> {
+        val processedMessageIdsHashSet = HashSet<String>()
         return messageUrlRegex.findAll(content).toList()
             .map { it.destructured }
             .mapNotNull { (guildId, channelId, messageId) ->
+                if (processedMessageIdsHashSet.contains(messageId)) {
+                    return@mapNotNull null
+                }
+
                 val currentGuild = jda.guilds.firstOrNull { it.id == guildId }
 
                 if (currentGuild == null || (!isCrossGuildPostingEnabled(currentGuild.id) && currentGuild.id != postedGuildId)) {
@@ -65,14 +70,22 @@ class QuoteEvent(private val database: Database) {
                 val channel = currentGuild.getChannel<GuildMessageChannel>(channelId)
                     ?: return@mapNotNull null
 
-                channel.retrieveMessageById(messageId).awaitOrNullOn(ErrorResponse.UNKNOWN_MESSAGE)
+                val message = channel.retrieveMessageById(messageId).awaitOrNullOn(ErrorResponse.UNKNOWN_MESSAGE)
+
+                if (message != null) {
+                    processedMessageIdsHashSet.add(messageId)
+                }
+
+                message
             }
     }
 
 
 
+
     private suspend fun processMessageWithLinks(event: MessageReceivedEvent, guildid: String = event.guild.id) {
         val messages = retrieveMessagesByLink(event.message.contentRaw, event.jda, guildid)
+        println(messages.size)
         for (i in 0 until minOf(3, messages.size)) {
             val message = messages[i]
             try {
@@ -82,7 +95,7 @@ class QuoteEvent(private val database: Database) {
                     val m = BuildQuoteEmbed(message, event.guild)
                     event.message.reply(m).setActionRow(button).mentionRepliedUser(false).queue()
                     recordQuoteStats(message, event)
-                    return
+                    continue
                 }
                 val m = BuildQuoteEmbed(message, event.guild)
                 event.message.reply(m).mentionRepliedUser(false).queue()
