@@ -41,7 +41,7 @@ class JoinLeaveLogging {
                 value = guild.timeCreated.toString()
                 inline = false
             }
-            Config.Constants.EMBED_COLOR
+            color = Config.Constants.EMBED_COLOR
         }
 
         webhook.sendMessageEmbeds(embed).queue()
