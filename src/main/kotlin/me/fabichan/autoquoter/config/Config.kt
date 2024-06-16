@@ -52,7 +52,7 @@ data class Config(
 
     object Constants {
         const val EMBED_COLOR = 0x00FFFF
-        const val BOT_VERSION = "1.0.2"
+        const val BOT_VERSION = "1.0.3"
         var quotes = "Loading..."
     }
 }
