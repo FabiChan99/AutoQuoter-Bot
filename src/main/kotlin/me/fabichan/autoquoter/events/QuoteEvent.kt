@@ -85,7 +85,6 @@ class QuoteEvent(private val database: Database) {
 
     private suspend fun processMessageWithLinks(event: MessageReceivedEvent, guildid: String = event.guild.id) {
         val messages = retrieveMessagesByLink(event.message.contentRaw, event.jda, guildid)
-        println(messages.size)
         for (i in 0 until minOf(3, messages.size)) {
             val message = messages[i]
             try {
