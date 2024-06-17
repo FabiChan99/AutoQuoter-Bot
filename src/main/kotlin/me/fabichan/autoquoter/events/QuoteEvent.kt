@@ -9,6 +9,7 @@ import io.github.freya022.botcommands.api.core.db.Database
 import io.github.freya022.botcommands.api.core.db.preparedStatement
 import io.github.freya022.botcommands.api.core.service.annotations.BService
 import io.github.freya022.botcommands.api.core.utils.awaitOrNullOn
+import io.github.freya022.botcommands.api.core.utils.retrieveMemberOrNull
 import io.github.oshai.kotlinlogging.KotlinLogging
 import me.fabichan.autoquoter.config.Config
 import net.dv8tion.jda.api.JDA
@@ -94,12 +95,12 @@ class QuoteEvent(private val database: Database) {
                 
                 if (message.guild.id == event.guild.id){
                     val button = Button.link("https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}", "Jump to message")
-                    val m = BuildQuoteEmbed(message, event.guild, event.member)
+                    val m = BuildQuoteEmbed(message, event.guild, event.jda.selfUser)
                     event.message.reply(m).setActionRow(button).mentionRepliedUser(false).queue()
                     recordQuoteStats(message, event)
                     continue
                 }
-                val m = BuildQuoteEmbed(message, event.guild, event.member)
+                val m = BuildQuoteEmbed(message, event.guild, event.jda.selfUser)
                 event.message.reply(m).mentionRepliedUser(false).queue()
                 recordQuoteStats(message, event)
             } catch (e: Exception) {
@@ -108,8 +109,10 @@ class QuoteEvent(private val database: Database) {
         }
     }
 
-    private suspend fun BuildQuoteEmbed(quotedMessage: Message, eventGuild: Guild, selfUser: Member?): MessageCreateData {
+    private suspend fun BuildQuoteEmbed(quotedMessage: Message, eventGuild: Guild, selfUser: SelfUser?): MessageCreateData {
         var ftitle = "AutoQuoter"
+        
+        val botmember = eventGuild.retrieveMemberById(selfUser?.idLong ?: 0).awaitOrNullOn(ErrorResponse.UNKNOWN_MEMBER)
         
         if (quotedMessage.guild.id != eventGuild.id) {
             ftitle += " - External Message from ${quotedMessage.guild.name}"
@@ -199,7 +202,7 @@ class QuoteEvent(private val database: Database) {
             iconUrl = quotedMessage.author.effectiveAvatarUrl
         }
         
-        eb.color = selfUser?.colorRaw ?: Config.Constants.EMBED_COLOR
+        eb.color = botmember?.colorRaw ?: Config.Constants.EMBED_COLOR
 
         val embed = eb.build()
 
