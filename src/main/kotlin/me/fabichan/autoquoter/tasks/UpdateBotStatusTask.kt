@@ -43,7 +43,7 @@ class UpdateBotStatusTask(private val database: Database) {
         val qouteCount = getQuoteCount().toString() + "x"
         val status = if (shardManager.guildCache.size() > 0) OnlineStatus.ONLINE else OnlineStatus.IDLE
         val activity =
-            createActivity("Quoted $qouteCount | on ${shardManager.guildCache.size()} servers | on Shard ${shard.shardInfo.shardId} • ${shard.gatewayPing}ms ping")
+            createActivity("Quoted $qouteCount | on Shard ${shard.shardInfo.shardId} • ${shard.gatewayPing}ms ping")
 
         shard.presence.setPresence(status, activity, false)
     }

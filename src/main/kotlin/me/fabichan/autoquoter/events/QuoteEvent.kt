@@ -10,10 +10,13 @@ import io.github.freya022.botcommands.api.core.db.preparedStatement
 import io.github.freya022.botcommands.api.core.service.annotations.BService
 import io.github.freya022.botcommands.api.core.utils.awaitOrNullOn
 import io.github.oshai.kotlinlogging.KotlinLogging
+import me.fabichan.autoquoter.config.Config
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.Message.Attachment
+import net.dv8tion.jda.api.entities.SelfUser
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.UserSnowflake
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel
@@ -91,12 +94,12 @@ class QuoteEvent(private val database: Database) {
                 
                 if (message.guild.id == event.guild.id){
                     val button = Button.link("https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}", "Jump to message")
-                    val m = BuildQuoteEmbed(message, event.guild)
+                    val m = BuildQuoteEmbed(message, event.guild, event.member)
                     event.message.reply(m).setActionRow(button).mentionRepliedUser(false).queue()
                     recordQuoteStats(message, event)
                     continue
                 }
-                val m = BuildQuoteEmbed(message, event.guild)
+                val m = BuildQuoteEmbed(message, event.guild, event.member)
                 event.message.reply(m).mentionRepliedUser(false).queue()
                 recordQuoteStats(message, event)
             } catch (e: Exception) {
@@ -105,7 +108,7 @@ class QuoteEvent(private val database: Database) {
         }
     }
 
-    private suspend fun BuildQuoteEmbed(quotedMessage: Message, eventGuild: Guild): MessageCreateData {
+    private suspend fun BuildQuoteEmbed(quotedMessage: Message, eventGuild: Guild, selfUser: Member?): MessageCreateData {
         var ftitle = "AutoQuoter"
         
         if (quotedMessage.guild.id != eventGuild.id) {
@@ -195,8 +198,8 @@ class QuoteEvent(private val database: Database) {
             name = "Sent by " + getUserName(quotedMessage.author)
             iconUrl = quotedMessage.author.effectiveAvatarUrl
         }
-
-        eb.color = 0x00FFFF
+        
+        eb.color = selfUser?.colorRaw ?: Config.Constants.EMBED_COLOR
 
         val embed = eb.build()
 
