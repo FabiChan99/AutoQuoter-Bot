@@ -21,7 +21,7 @@ The information we collect is used solely for the purpose of providing and impro
 ## Data Storage and Security
 We are committed to ensuring that your information is secure. To prevent unauthorized access or disclosure, we have put in place suitable physical, electronic, and managerial procedures to safeguard and secure the information we collect.
 
-1. **Data Storage**: Your data is stored securely and is only accessible by authorized personnel.
+1. **Data Storage**: Your data is stored securely and is only accessible by the bot dev for diagnostic purposes.
 2. **Data Retention**: We retain your data only for as long as necessary to fulfill the purposes outlined in this policy.
 
 ## Sharing Your Information
@@ -39,7 +39,7 @@ You have the right to:
 - Request the deletion of your data.
 - Object to the processing of your data.
 
-If you wish to exercise any of these rights, please contact us at contact@autoqouter.xyz.
+If you wish to exercise any of these rights, please contact us at contact@autoquoter.xyz or at [Our Support Server](https://support.autoquoter.xyz/)
 
 ## Changes to This Privacy Policy
 We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.
