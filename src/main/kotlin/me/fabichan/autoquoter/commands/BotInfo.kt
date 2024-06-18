@@ -13,10 +13,8 @@ import me.fabichan.autoquoter.config.Config
 import net.dv8tion.jda.api.JDAInfo
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.interactions.components.buttons.Button
-import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.utils.TimeFormat
 import java.lang.management.ManagementFactory
-import kotlin.time.Duration.Companion.minutes
 
 
 private val logger = KotlinLogging.logger { }

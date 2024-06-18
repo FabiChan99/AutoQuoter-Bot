@@ -1,6 +1,5 @@
 package me.fabichan.autoquoter.events
 
-import dev.minn.jda.ktx.coroutines.await
 import dev.minn.jda.ktx.generics.getChannel
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.MessageCreate
@@ -9,26 +8,18 @@ import io.github.freya022.botcommands.api.core.db.Database
 import io.github.freya022.botcommands.api.core.db.preparedStatement
 import io.github.freya022.botcommands.api.core.service.annotations.BService
 import io.github.freya022.botcommands.api.core.utils.awaitOrNullOn
-import io.github.freya022.botcommands.api.core.utils.retrieveMemberOrNull
 import io.github.oshai.kotlinlogging.KotlinLogging
 import me.fabichan.autoquoter.config.Config
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
-import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.entities.Message.Attachment
 import net.dv8tion.jda.api.entities.SelfUser
 import net.dv8tion.jda.api.entities.User
-import net.dv8tion.jda.api.entities.UserSnowflake
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.requests.ErrorResponse
-import net.dv8tion.jda.api.utils.AttachedFile
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
-import nonapi.io.github.classgraph.json.Id
-import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.days
 
 private val logger = KotlinLogging.logger { }
 
@@ -48,7 +39,7 @@ class QuoteEvent(private val database: Database) {
         "(?:https?://)?(?:\\w+\\.)?discord(?:app)?\\.com/channels/(\\d+)/(\\d+)/(\\d+)",
         RegexOption.IGNORE_CASE
     )
-    
+
     private suspend fun isCrossGuildPostingEnabled(guildid: String): Boolean {
         return database.preparedStatement("SELECT crossguildposting FROM guildsettings WHERE guild_id = ?") {
             executeQuery(guildid.toLong()).map { it.getBoolean("crossguildposting") }.firstOrNull() ?: false
@@ -85,16 +76,17 @@ class QuoteEvent(private val database: Database) {
     }
 
 
-
-
     private suspend fun processMessageWithLinks(event: MessageReceivedEvent, guildid: String = event.guild.id) {
         val messages = retrieveMessagesByLink(event.message.contentRaw, event.jda, guildid)
         for (i in 0 until minOf(3, messages.size)) {
             val message = messages[i]
             try {
-                
-                if (message.guild.id == event.guild.id){
-                    val button = Button.link("https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}", "Jump to message")
+
+                if (message.guild.id == event.guild.id) {
+                    val button = Button.link(
+                        "https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}",
+                        "Jump to message"
+                    )
                     val m = BuildQuoteEmbed(message, event.guild, event.jda.selfUser)
                     event.message.reply(m).setActionRow(button).mentionRepliedUser(false).queue()
                     recordQuoteStats(message, event)
@@ -109,11 +101,15 @@ class QuoteEvent(private val database: Database) {
         }
     }
 
-    private suspend fun BuildQuoteEmbed(quotedMessage: Message, eventGuild: Guild, selfUser: SelfUser?): MessageCreateData {
+    private suspend fun BuildQuoteEmbed(
+        quotedMessage: Message,
+        eventGuild: Guild,
+        selfUser: SelfUser?
+    ): MessageCreateData {
         var ftitle = "AutoQuoter"
-        
+
         val botmember = eventGuild.retrieveMemberById(selfUser?.idLong ?: 0).awaitOrNullOn(ErrorResponse.UNKNOWN_MEMBER)
-        
+
         if (quotedMessage.guild.id != eventGuild.id) {
             ftitle += " - External Message from ${quotedMessage.guild.name}"
         }
@@ -139,18 +135,14 @@ class QuoteEvent(private val database: Database) {
                     if (attachment.isImage) {
                         eb.image = attachment.url
                     }
-                    
+
                     if (attachment.isVideo) {
                         eb.description = "Videos can't be quoted"
                     }
                 }
-            }
-
-            else if (quotedMessage.stickers.isNotEmpty() && quotedMessage.contentRaw.isEmpty()) {
+            } else if (quotedMessage.stickers.isNotEmpty() && quotedMessage.contentRaw.isEmpty()) {
                 eb.image = quotedMessage.stickers[0].iconUrl
-            }
-            
-            else if (quotedMessage.attachments.isNotEmpty() && quotedMessage.contentRaw.isEmpty()) {
+            } else if (quotedMessage.attachments.isNotEmpty() && quotedMessage.contentRaw.isEmpty()) {
                 val attachment = quotedMessage.attachments[0]
                 if (attachment.isImage) {
                     eb.image = attachment.url
@@ -161,7 +153,7 @@ class QuoteEvent(private val database: Database) {
             }
         } else {
             val oldEmbed = quotedMessage.embeds[0]
-            
+
             // check image 
             if (oldEmbed.image != null) {
                 eb.image = oldEmbed.image?.url
@@ -201,7 +193,7 @@ class QuoteEvent(private val database: Database) {
             name = "Sent by " + getUserName(quotedMessage.author)
             iconUrl = quotedMessage.author.effectiveAvatarUrl
         }
-        
+
         eb.color = botmember?.colorRaw ?: Config.Constants.EMBED_COLOR
 
         val embed = eb.build()
