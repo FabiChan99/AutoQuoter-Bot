@@ -14,7 +14,6 @@ class Help : GlobalApplicationCommandProvider {
     suspend fun onCommand(
         event: GuildSlashEvent,
     ) {
-        val selfUserId = event.jda.selfUser.id
         val text = """
             Welcome to AutoQuoter! Here is a list of commands and features to help you get started:
             
